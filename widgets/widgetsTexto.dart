@@ -7,7 +7,7 @@ class Textos extends StatelessWidget {
     seutexto,
     style: TextStyle(
     color: Colors.red,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.white, 
     fontSize: 32
     ),
     );
