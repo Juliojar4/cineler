@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 class Textos extends StatelessWidget {
-  final String seutexto;
-  final double tamanho;
+  String seutexto;
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4),
-      child: Text(
-        seutexto,
-        style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface, fontSize: tamanho),
-      ),
+    return Text(
+    seutexto,
+    style: TextStyle(
+    color: Colors.red,
+    backgroundColor: Colors.white,
+    fontSize: 32
+    ),
     );
   }
-  Textos(this.seutexto, {this.tamanho = 18});
+  Textos(this.seutexto);
 }

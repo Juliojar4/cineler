@@ -3,8 +3,7 @@ import 'package:dio/dio.dart';
 import '../model/titulo.dart';
 
 class FilmeService {
-  //Chave gratuita: crie uma conta em https://www.themoviedb.org/settings/api
-  static const _apiKey = String.fromEnvironment('TMDB_KEY', defaultValue: '3502b0392efe92a8d258ae732c11f5e1');
+  final String _apiKey = "3502b0392efe92a8d258ae732c11f5e1";
 
   final Dio _dio = Dio(
     BaseOptions(
@@ -14,7 +13,6 @@ class FilmeService {
     ),
   );
 
-  //Pesquisa filmes e séries pelo nome
   Future<List<Titulo>> buscarFilmesSeries(String nome) async {
     try {
       final response = await _dio.get('/search/multi', queryParameters: {
@@ -23,20 +21,16 @@ class FilmeService {
         'language': 'pt-BR',
       });
 
-      if (response.statusCode == 200) {
-        final List resultados = response.data['results'];
-        return resultados
-            .where((r) => r['media_type'] == 'movie' || r['media_type'] == 'tv')
-            .map((r) => Titulo.fromTmdb(r))
-            .toList();
-      } else {
-        throw Exception("Erro na requisição");
+      List<Titulo> lista = [];
+      for (var item in response.data['results']) {
+        //A pesquisa também traz pessoas, que não entram na lista
+        if (item['media_type'] == 'movie' || item['media_type'] == 'tv') {
+          lista.add(Titulo.fromTmdb(item));
+        }
       }
+      return lista;
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw Exception("Chave da API de filmes inválida");
-      }
-      throw Exception("Serviço de filmes indisponível. Verifique sua conexão.");
+      throw Exception("Erro de conexão: ${e.message}");
     }
   }
 }

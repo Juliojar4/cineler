@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../model/usuario.dart';
-import '../widgets/widgetsButton.dart';
 import '../widgets/widgetsTexto.dart';
 import 'tela_lista.dart';
-import 'tela_login.dart';
 import 'tela_pesquisa.dart';
 
 class Menu extends StatelessWidget {
-  final Usuario usuario; //usuário ativo, repassado para as outras telas
+  Usuario usuario;
   Menu(this.usuario);
 
   @override
@@ -22,32 +20,29 @@ class Menu extends StatelessWidget {
             onPressed: () {
               _abreOutraTela(context, TelaPesquisa(usuario));
             },
-            tooltip: 'Pesquisar títulos',
+            tooltip: 'Clique para pesquisar títulos',
+          ),
+          IconButton(
+            icon: Icon(Icons.line_style),
+            onPressed: () {
+              _abreOutraTela(context, TelaLista(usuario));
+            },
+            tooltip: 'Clique para visualizar sua lista',
           ),
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () {
-              _sair(context);
+              Navigator.pop(context); //Sair: volta para o login
             },
-            tooltip: 'Sair',
-          )
+            tooltip: 'Clique para sair',
+          ),
         ],
       ),
       body: ListView(
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.all(9),
         children: [
-          Textos("Olá, ${usuario.nome}!", tamanho: 24),
-          Textos("O que você quer fazer?", tamanho: 16),
-          SizedBox(height: 16),
-          Botoes("Pesquisar filmes, séries e livros", onPressed: () {
-            _abreOutraTela(context, TelaPesquisa(usuario));
-          }),
-          Botoes("Minha lista", onPressed: () {
-            _abreOutraTela(context, TelaLista(usuario));
-          }),
-          Botoes("Sair", onPressed: () {
-            _sair(context);
-          }),
+          Textos("Olá, ${usuario.nome}!"),
+          Text("Use os botões acima para pesquisar, ver sua lista ou sair."),
         ],
       ),
     );
@@ -57,12 +52,5 @@ class Menu extends StatelessWidget {
     Navigator.push(ctx, MaterialPageRoute(builder: (BuildContext context) {
       return page;
     }));
-  }
-
-  //Volta para o login e limpa as telas abertas
-  _sair(ctx) {
-    Navigator.pushAndRemoveUntil(ctx, MaterialPageRoute(builder: (BuildContext context) {
-      return TelaLogin();
-    }), (rota) => false);
   }
 }

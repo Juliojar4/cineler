@@ -11,7 +11,7 @@ import '../widgets/widgetsTexto.dart';
 import 'tela_detalhes.dart';
 
 class TelaPesquisa extends StatefulWidget {
-  final Usuario usuario;
+  Usuario usuario;
   TelaPesquisa(this.usuario);
 
   @override
@@ -20,9 +20,9 @@ class TelaPesquisa extends StatefulWidget {
 
 class _TelaPesquisaState extends State<TelaPesquisa> {
   String _textoBotao = "Pesquisar";
-  String _tipo = "filmes"; //resposta do radio: filmes ou livros
-  String? _aviso; //mensagem quando não encontra ou dá erro
-  List<Titulo> _resultados = [];
+  String _tipo = "filmes"; //Resposta do radio
+  String _aviso = "";
+  List<Titulo> _resultsList = [];
   final FilmeService _filmeService = FilmeService();
   final LivroService _livroService = LivroService();
   final TextEditingController _controllerBusca = TextEditingController();
@@ -39,95 +39,78 @@ class _TelaPesquisaState extends State<TelaPesquisa> {
 
   _body() {
     return ListView(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(9),
       children: [
-        _radioButton(),
-        InputTextos(_tipo == "filmes" ? "Nome do filme ou série" : "Título do livro", " ",
-            controller: _controllerBusca),
+        _radioButton("Filmes e séries", "filmes"),
+        _radioButton("Livros", "livros"),
+        InputTextos("Nome do título", "Digite o nome", controller: _controllerBusca),
         Botoes(_textoBotao, onPressed: _buscar),
-        if (_aviso != null) Textos(_aviso!, tamanho: 16),
-        ..._resultados.map(_itemResultado),
+        Text(_aviso),
+        for (var titulo in _resultsList)
+          ListTile(
+            leading: Imagens(titulo.imagem, 60),
+            title: Text(titulo.nome),
+            subtitle: Text("${titulo.tipo} ${titulo.info ?? ""}"),
+            onTap: () {
+              _abreOutraTela(context, TelaDetalhes(widget.usuario, titulo));
+            },
+          ),
       ],
     );
   }
 
-  _radioButton() {
-    return RadioGroup<String>(
-      groupValue: _tipo,
-      onChanged: _escolheTipo,
-      child: Row(
-        children: [
-          Expanded(
-            child: RadioListTile<String>(
-              value: "filmes",
-              title: Text("Filmes e séries"),
-              contentPadding: EdgeInsets.zero,
-            ),
-          ),
-          Expanded(
-            child: RadioListTile<String>(
-              value: "livros",
-              title: Text("Livros"),
-              contentPadding: EdgeInsets.zero,
-            ),
-          ),
-        ],
-      ),
+  _radioButton(String texto, String valor) {
+    return Row(
+      children: <Widget>[
+        Textos(texto),
+        Radio<String>(
+          value: valor,
+          groupValue: _tipo,
+          onChanged: _radioValueChange,
+        ),
+      ],
     );
   }
 
-  void _escolheTipo(String? valor) {
+  void _radioValueChange(String? value) {
     setState(() {
-      _tipo = valor!;
-      _resultados = [];
-      _aviso = null;
+      _tipo = value!;
     });
-  }
-
-  Widget _itemResultado(Titulo titulo) {
-    return Card(
-      child: ListTile(
-        leading: Capa(titulo.imagem),
-        title: Text(titulo.nome),
-        subtitle: Text([titulo.tipo, if (titulo.info != null) titulo.info].join(" • ")),
-        trailing: Icon(Icons.chevron_right),
-        onTap: () {
-          _abreOutraTela(context, TelaDetalhes(widget.usuario, titulo));
-        },
-      ),
-    );
   }
 
   Future<void> _buscar() async {
-    final texto = _controllerBusca.text.trim();
-    if (texto.isEmpty) {
+    if (_controllerBusca.text.trim().isEmpty) {
       setState(() {
-        _aviso = "Digite o que deseja pesquisar";
+        _aviso = "Digite o nome do título";
       });
       return;
     }
-    FocusScope.of(context).unfocus();
     setState(() {
       _textoBotao = "Pesquisando...";
-      _aviso = null;
+      _aviso = "";
     });
     try {
       final resultado = _tipo == "filmes"
-          ? await _filmeService.buscarFilmesSeries(texto)
-          : await _livroService.buscarLivros(texto);
+          ? await _filmeService.buscarFilmesSeries(_controllerBusca.text)
+          : await _livroService.buscarLivros(_controllerBusca.text);
+      if (!mounted) return;
       setState(() {
-        _resultados = resultado;
+        _resultsList = resultado;
         if (resultado.isEmpty) _aviso = "Nenhum título encontrado";
       });
     } catch (e) {
+      print("Erro: $e");
+      if (!mounted) return;
       setState(() {
-        _resultados = [];
-        _aviso = e.toString().replaceFirst("Exception: ", "");
+        _resultsList = [];
+        _aviso = "Serviço indisponível. Verifique sua conexão.";
       });
     } finally {
-      setState(() {
-        _textoBotao = "Pesquisar";
-      });
+      if (mounted) {
+        setState(() {
+          _textoBotao = "Pesquisar";
+        });
+      }
     }
   }
 

@@ -10,11 +10,10 @@ import '../model/usuario.dart';
 class BancoService {
   static Database? _db;
 
-  Future<Database> get _banco async {
+  Future<Database> _abrir() async {
     _db ??= await openDatabase(
       join(await getDatabasesPath(), 'cineler.db'),
       version: 1,
-      onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE usuarios(
@@ -25,7 +24,7 @@ class BancoService {
         await db.execute('''
           CREATE TABLE titulos(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+            usuario_id INTEGER NOT NULL,
             id_api TEXT NOT NULL,
             tipo TEXT NOT NULL,
             nome TEXT NOT NULL,
@@ -39,71 +38,60 @@ class BancoService {
     return _db!;
   }
 
-  static String _hash(String senha) => sha256.convert(utf8.encode(senha)).toString();
-
-  //RF-01: e-mail repetido é barrado pelo UNIQUE da tabela
-  Future<void> cadastrarUsuario(String nome, String email, String senha) async {
-    final db = await _banco;
-    try {
-      await db.insert('usuarios',
-          Usuario(nome: nome, email: email.toLowerCase(), senha: _hash(senha)).toMap());
-    } on DatabaseException catch (e) {
-      if (e.isUniqueConstraintError()) {
-        throw Exception("Já existe um usuário com este e-mail");
-      }
-      rethrow;
-    }
+  //A senha é guardada somente como hash
+  String _hash(String senha) {
+    return sha256.convert(utf8.encode(senha)).toString();
   }
 
-  //RF-02: retorna o usuário se e-mail e senha conferirem
+  //Retorna false se o e-mail já estiver cadastrado
+  Future<bool> cadastrarUsuario(String nome, String email, String senha) async {
+    final db = await _abrir();
+    final id = await db.insert(
+      'usuarios',
+      {'nome': nome, 'email': email.toLowerCase(), 'senha': _hash(senha)},
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
+    return id != 0;
+  }
+
+  //Retorna null se o e-mail ou a senha estiverem errados
   Future<Usuario?> entrar(String email, String senha) async {
-    final db = await _banco;
+    final db = await _abrir();
     final res = await db.query('usuarios',
         where: 'email = ? AND senha = ?', whereArgs: [email.toLowerCase(), _hash(senha)]);
     return res.isEmpty ? null : Usuario.fromMap(res.first);
   }
 
-  //RF-06
   Future<void> salvarTitulo(Usuario usuario, Titulo titulo) async {
-    final db = await _banco;
-    try {
-      await db.insert('titulos', titulo.copiaCom(usuarioId: usuario.id).toMap());
-    } on DatabaseException catch (e) {
-      if (e.isUniqueConstraintError()) {
-        throw Exception("Este título já está na sua lista");
-      }
-      rethrow;
-    }
+    final db = await _abrir();
+    await db.insert('titulos', {...titulo.toMap(), 'usuario_id': usuario.id},
+        conflictAlgorithm: ConflictAlgorithm.ignore);
   }
 
-  //RF-07: somente os títulos do usuário ativo
   Future<List<Titulo>> listarTitulos(Usuario usuario) async {
-    final db = await _banco;
+    final db = await _abrir();
     final res = await db.query('titulos',
         where: 'usuario_id = ?', whereArgs: [usuario.id], orderBy: 'nome');
-    return res.map((t) => Titulo.fromMap(t)).toList();
+    return res.map((item) => Titulo.fromMap(item)).toList();
   }
 
-  //Procura o título na lista do usuário (null se ainda não salvou)
+  //Procura o título na lista do usuário, retorna null se não estiver salvo
   Future<Titulo?> buscarTitulo(Usuario usuario, Titulo titulo) async {
-    final db = await _banco;
+    final db = await _abrir();
     final res = await db.query('titulos',
         where: 'usuario_id = ? AND tipo = ? AND id_api = ?',
         whereArgs: [usuario.id, titulo.tipo, titulo.idApi]);
     return res.isEmpty ? null : Titulo.fromMap(res.first);
   }
 
-  //RF-08
-  Future<void> atualizarSituacao(Usuario usuario, Titulo titulo) async {
-    final db = await _banco;
+  Future<void> atualizarSituacao(Titulo titulo) async {
+    final db = await _abrir();
     await db.update('titulos', {'situacao': titulo.situacao},
-        where: 'id = ? AND usuario_id = ?', whereArgs: [titulo.id, usuario.id]);
+        where: 'id = ?', whereArgs: [titulo.id]);
   }
 
-  //RF-09
-  Future<void> removerTitulo(Usuario usuario, Titulo titulo) async {
-    final db = await _banco;
-    await db.delete('titulos',
-        where: 'id = ? AND usuario_id = ?', whereArgs: [titulo.id, usuario.id]);
+  Future<void> removerTitulo(Titulo titulo) async {
+    final db = await _abrir();
+    await db.delete('titulos', where: 'id = ?', whereArgs: [titulo.id]);
   }
 }

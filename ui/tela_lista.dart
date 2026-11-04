@@ -4,11 +4,10 @@ import '../model/titulo.dart';
 import '../model/usuario.dart';
 import '../services/banco_service.dart';
 import '../widgets/widgetsImagem.dart';
-import '../widgets/widgetsTexto.dart';
 import 'tela_detalhes.dart';
 
 class TelaLista extends StatefulWidget {
-  final Usuario usuario;
+  Usuario usuario;
   TelaLista(this.usuario);
 
   @override
@@ -30,13 +29,6 @@ class _TelaListaState extends State<TelaLista> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Minha lista"),
-        actions: [
-          IconButton(
-            onPressed: _buscaRegistro,
-            icon: Icon(Icons.refresh),
-            tooltip: 'Atualizar',
-          )
-        ],
       ),
       body: _lista(),
     );
@@ -44,29 +36,29 @@ class _TelaListaState extends State<TelaLista> {
 
   _lista() {
     if (_resultsList.isEmpty) {
-      return Center(child: Textos("Sua lista está vazia.\nPesquise e salve títulos!"));
+      return Center(child: Text("Sua lista está vazia"));
     }
-    return ListView.builder(
-      padding: EdgeInsets.all(8),
-      itemCount: _resultsList.length,
-      itemBuilder: (context, i) {
-        final titulo = _resultsList[i];
-        return Card(
-          child: ListTile(
-            leading: Capa(titulo.imagem),
+    return ListView(
+      padding: EdgeInsets.all(9),
+      children: [
+        for (var titulo in _resultsList)
+          ListTile(
+            leading: Imagens(titulo.imagem, 60),
             title: Text(titulo.nome),
-            subtitle: Text("${titulo.tipo} • ${titulo.situacao}"),
-            trailing: Icon(Icons.chevron_right),
-            onTap: () async {
-              await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) {
-                return TelaDetalhes(widget.usuario, titulo);
-              }));
-              _buscaRegistro(); //reflete alterações de situação/remoção
+            subtitle: Text("${titulo.tipo} - ${titulo.situacao}"),
+            onTap: () {
+              _abreDetalhes(titulo);
             },
           ),
-        );
-      },
+      ],
     );
+  }
+
+  Future<void> _abreDetalhes(Titulo titulo) async {
+    await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) {
+      return TelaDetalhes(widget.usuario, titulo);
+    }));
+    _buscaRegistro(); //Mostra as mudanças feitas nos detalhes
   }
 
   Future<void> _buscaRegistro() async {

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../services/banco_service.dart';
 import '../widgets/widgetsButton.dart';
 import '../widgets/widgetsInput.dart';
-import '../widgets/widgetsTexto.dart';
 import 'menu.dart';
 import 'tela_cadastro.dart';
 
@@ -13,58 +12,56 @@ class TelaLogin extends StatefulWidget {
 }
 
 class _TelaLoginState extends State<TelaLogin> {
-  final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _senha = TextEditingController();
   final BancoService _banco = BancoService();
+  String _aviso = "";
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("CineLer - Entrar"),
+        title: Text("CineLer"),
       ),
       body: _body(),
     );
   }
 
   _body() {
-    return Form(
-      key: _formKey,
-      child: ListView(
-        padding: EdgeInsets.all(16),
-        children: [
-          Icon(Icons.movie_filter, size: 80, color: Theme.of(context).colorScheme.primary),
-          Textos("Seus filmes, séries e livros em um só lugar.", tamanho: 16),
-          SizedBox(height: 16),
-          InputTextos("E-mail", "Digite seu e-mail", controller: _email, obrigatorio: true),
-          InputTextos("Senha", "Digite sua senha", controller: _senha, senha: true, obrigatorio: true),
-          Botoes("Entrar", onPressed: _entrar),
-          TextButton(
-            onPressed: () {
-              _abreOutraTela(context, TelaCadastro());
-            },
-            child: Text("Não tem conta? Cadastre-se"),
-          ),
-        ],
-      ),
+    return ListView(
+      padding: EdgeInsets.all(9),
+      children: [
+        InputTextos("E-mail *", "Digite seu e-mail", controller: _email),
+        InputTextos("Senha *", "Digite sua senha", controller: _senha, senha: true),
+        Text(_aviso),
+        Botoes("Entrar", onPressed: _entrar),
+        Botoes("Cadastrar", onPressed: () {
+          _abreOutraTela(context, TelaCadastro());
+        }),
+      ],
     );
   }
 
   Future<void> _entrar() async {
-    if (!_formKey.currentState!.validate()) return;
-    final usuario = await _banco.entrar(_email.text.trim(), _senha.text);
-    if (!mounted) return;
-    if (usuario == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("E-mail ou senha inválidos")));
+    if (_email.text.trim().isEmpty || _senha.text.isEmpty) {
+      setState(() {
+        _aviso = "Preencha os campos obrigatórios";
+      });
       return;
     }
-    _senha.clear();
-    //Substitui a tela de login, assim o "voltar" não retorna para ela
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) {
-      return Menu(usuario);
-    }));
+    final usuario = await _banco.entrar(_email.text.trim(), _senha.text);
+    if (usuario == null) {
+      setState(() {
+        _aviso = "E-mail ou senha inválidos";
+      });
+      return;
+    }
+    setState(() {
+      _aviso = "";
+      _senha.text = "";
+    });
+    if (!mounted) return;
+    _abreOutraTela(context, Menu(usuario));
   }
 
   _abreOutraTela(ctx, page) {
