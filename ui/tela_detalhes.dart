@@ -20,7 +20,7 @@ class TelaDetalhes extends StatefulWidget {
 class _TelaDetalhesState extends State<TelaDetalhes> {
   final BancoService _banco = BancoService();
   final LivroService _livroService = LivroService();
-  Titulo? _salvo; //Título na lista do usuário, null se ainda não foi salvo
+  Titulo? _salvo;
 
   @override
   void initState() {
@@ -86,7 +86,6 @@ class _TelaDetalhesState extends State<TelaDetalhes> {
     });
   }
 
-  //Livros vêm da pesquisa sem descrição
   Future<void> _buscaDescricao() async {
     if (widget.titulo.tipo != "Livro" || widget.titulo.descricao != null) return;
     final descricao = await _livroService.buscarDescricao(widget.titulo.idApi);

@@ -58,7 +58,7 @@ class _TelaListaState extends State<TelaLista> {
     await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) {
       return TelaDetalhes(widget.usuario, titulo);
     }));
-    _buscaRegistro(); //Mostra as mudanças feitas nos detalhes
+    _buscaRegistro();
   }
 
   Future<void> _buscaRegistro() async {

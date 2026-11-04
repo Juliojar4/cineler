@@ -1,11 +1,11 @@
 class Titulo {
-  final int? id; //id no banco
-  final String idApi; //id na API externa
-  final String tipo; //Filme, Série ou Livro
+  final int? id;
+  final String idApi;
+  final String tipo;
   final String nome;
   String? descricao;
   final String? imagem;
-  final String? info; //ano (filmes e séries) ou autor (livros)
+  final String? info;
   String situacao;
 
   Titulo({
@@ -19,7 +19,6 @@ class Titulo {
     this.situacao = 'Quero assistir/ler',
   });
 
-  //Dados vindos da API de filmes e séries (TMDB)
   factory Titulo.fromTmdb(Map<String, dynamic> json) {
     bool filme = json['media_type'] == 'movie';
     String? data = filme ? json['release_date'] : json['first_air_date'];
@@ -33,7 +32,6 @@ class Titulo {
     );
   }
 
-  //Dados vindos da API de livros (Open Library)
   factory Titulo.fromOpenLibrary(Map<String, dynamic> json) {
     return Titulo(
       idApi: json['key'],
@@ -44,7 +42,6 @@ class Titulo {
     );
   }
 
-  //Dados vindos do banco
   factory Titulo.fromMap(Map<String, dynamic> map) {
     return Titulo(
       id: map['id'],

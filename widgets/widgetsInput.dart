@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 class InputTextos extends StatelessWidget {
-  String rotulo; //Podera atribuir um rótulo
-  String label; //Podera atribuir um "hint"
+  String rotulo;
+  String label;
   TextEditingController controller;
-  //Para pegar o texto digitado
-  bool senha; //Esconde o texto digitado
+  bool senha;
 
   InputTextos(this.rotulo, this.label, {required this.controller, this.senha = false});
-  //Construtor
 
   @override
   Widget build(BuildContext context) {

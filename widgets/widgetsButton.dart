@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 class Botoes extends StatelessWidget {
-  String texto; //parametro
-  void Function() onPressed; //parametro referente ao metodo que
-  //sera chamada da classe Home. Armazenara o caminho (ponteiro) da tela
-  //que será chamado
+  String texto;
+  void Function() onPressed;
   Botoes(this.texto, {required this.onPressed});
 
   @override

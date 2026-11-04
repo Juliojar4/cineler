@@ -29,7 +29,6 @@ class LivroService {
     }
   }
 
-  //A pesquisa não traz a descrição, ela vem nos detalhes do livro
   Future<String?> buscarDescricao(String key) async {
     try {
       final response = await _dio.get('$key.json');

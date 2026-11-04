@@ -38,23 +38,22 @@ class BancoService {
     return _db!;
   }
 
-  //A senha é guardada somente como hash
   String _hash(String senha) {
     return sha256.convert(utf8.encode(senha)).toString();
   }
 
-  //Retorna false se o e-mail já estiver cadastrado
   Future<bool> cadastrarUsuario(String nome, String email, String senha) async {
     final db = await _abrir();
-    final id = await db.insert(
-      'usuarios',
-      {'nome': nome, 'email': email.toLowerCase(), 'senha': _hash(senha)},
-      conflictAlgorithm: ConflictAlgorithm.ignore,
-    );
-    return id != 0;
+    try {
+      await db.insert('usuarios',
+          {'nome': nome, 'email': email.toLowerCase(), 'senha': _hash(senha)});
+      return true;
+    } on DatabaseException catch (e) {
+      if (e.isUniqueConstraintError()) return false;
+      rethrow;
+    }
   }
 
-  //Retorna null se o e-mail ou a senha estiverem errados
   Future<Usuario?> entrar(String email, String senha) async {
     final db = await _abrir();
     final res = await db.query('usuarios',
@@ -75,7 +74,6 @@ class BancoService {
     return res.map((item) => Titulo.fromMap(item)).toList();
   }
 
-  //Procura o título na lista do usuário, retorna null se não estiver salvo
   Future<Titulo?> buscarTitulo(Usuario usuario, Titulo titulo) async {
     final db = await _abrir();
     final res = await db.query('titulos',

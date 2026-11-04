@@ -32,7 +32,7 @@ class Menu extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () {
-              Navigator.pop(context); //Sair: volta para o login
+              Navigator.pop(context);
             },
             tooltip: 'Clique para sair',
           ),

@@ -23,7 +23,6 @@ class FilmeService {
 
       List<Titulo> lista = [];
       for (var item in response.data['results']) {
-        //A pesquisa também traz pessoas, que não entram na lista
         if (item['media_type'] == 'movie' || item['media_type'] == 'tv') {
           lista.add(Titulo.fromTmdb(item));
         }

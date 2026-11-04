@@ -20,7 +20,7 @@ class TelaPesquisa extends StatefulWidget {
 
 class _TelaPesquisaState extends State<TelaPesquisa> {
   String _textoBotao = "Pesquisar";
-  String _tipo = "filmes"; //Resposta do radio
+  String _tipo = "filmes";
   String _aviso = "";
   List<Titulo> _resultsList = [];
   final FilmeService _filmeService = FilmeService();

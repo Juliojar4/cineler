@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 class Imagens extends StatelessWidget {
-  String? url; //A imagem pode faltar na API
+  String? url;
   double altura;
   Imagens(this.url, this.altura);
 
@@ -12,7 +12,6 @@ class Imagens extends StatelessWidget {
     return Image.network(
       url!,
       height: altura,
-      //Sem Internet mostra o ícone no lugar da imagem
       errorBuilder: (context, erro, pilha) => Icon(Icons.image_not_supported, size: altura),
     );
   }
