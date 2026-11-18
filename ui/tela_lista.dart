@@ -35,20 +35,37 @@ class _TelaListaState extends State<TelaLista> {
   }
 
   _lista() {
+    final cores = Theme.of(context).colorScheme;
     if (_resultsList.isEmpty) {
-      return Center(child: Text("Sua lista está vazia"));
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.bookmark_border_rounded, size: 72, color: cores.onSurfaceVariant),
+            SizedBox(height: 12),
+            Text("Sua lista está vazia", style: TextStyle(color: cores.onSurfaceVariant, fontSize: 16)),
+          ],
+        ),
+      );
     }
     return ListView(
-      padding: EdgeInsets.all(9),
+      padding: EdgeInsets.all(16),
       children: [
         for (var titulo in _resultsList)
-          ListTile(
-            leading: Imagens(titulo.imagem, 60),
-            title: Text(titulo.nome),
-            subtitle: Text("${titulo.tipo} - ${titulo.situacao}"),
-            onTap: () {
-              _abreDetalhes(titulo);
-            },
+          Card(
+            child: ListTile(
+              contentPadding: EdgeInsets.all(8),
+              leading: Imagens(titulo.imagem, 72),
+              title: Text(titulo.nome, style: TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Padding(
+                padding: EdgeInsets.only(top: 6),
+                child: Text("${titulo.tipo} • ${titulo.situacao}", style: TextStyle(color: cores.primary)),
+              ),
+              trailing: Icon(Icons.chevron_right),
+              onTap: () {
+                _abreDetalhes(titulo);
+              },
+            ),
           ),
       ],
     );

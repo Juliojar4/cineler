@@ -7,7 +7,6 @@ import '../services/livro_service.dart';
 import '../widgets/widgetsButton.dart';
 import '../widgets/widgetsImagem.dart';
 import '../widgets/widgetsInput.dart';
-import '../widgets/widgetsTexto.dart';
 import 'tela_detalhes.dart';
 
 class TelaPesquisa extends StatefulWidget {
@@ -39,43 +38,44 @@ class _TelaPesquisaState extends State<TelaPesquisa> {
 
   _body() {
     return ListView(
-      padding: EdgeInsets.all(9),
+      padding: EdgeInsets.all(16),
       children: [
-        _radioButton("Filmes e séries", "filmes"),
-        _radioButton("Livros", "livros"),
-        InputTextos("Nome do título", "Digite o nome", controller: _controllerBusca),
+        SegmentedButton<String>(
+          segments: [
+            ButtonSegment(value: "filmes", label: Text("Filmes e séries"), icon: Icon(Icons.movie_outlined)),
+            ButtonSegment(value: "livros", label: Text("Livros"), icon: Icon(Icons.menu_book_outlined)),
+          ],
+          selected: {_tipo},
+          onSelectionChanged: (selecao) {
+            setState(() {
+              _tipo = selecao.first;
+            });
+          },
+        ),
+        SizedBox(height: 8),
+        InputTextos("Nome do título", "Digite o nome", controller: _controllerBusca, icone: Icons.search),
         Botoes(_textoBotao, onPressed: _buscar),
-        Text(_aviso),
+        if (_aviso.isNotEmpty)
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: Text(_aviso, textAlign: TextAlign.center, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          ),
+        SizedBox(height: 8),
         for (var titulo in _resultsList)
-          ListTile(
-            leading: Imagens(titulo.imagem, 60),
-            title: Text(titulo.nome),
-            subtitle: Text("${titulo.tipo} ${titulo.info ?? ""}"),
-            onTap: () {
-              _abreOutraTela(context, TelaDetalhes(widget.usuario, titulo));
-            },
+          Card(
+            child: ListTile(
+              contentPadding: EdgeInsets.all(8),
+              leading: Imagens(titulo.imagem, 72),
+              title: Text(titulo.nome, style: TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text("${titulo.tipo} • ${titulo.info ?? ""}", maxLines: 2, overflow: TextOverflow.ellipsis),
+              trailing: Icon(Icons.chevron_right),
+              onTap: () {
+                _abreOutraTela(context, TelaDetalhes(widget.usuario, titulo));
+              },
+            ),
           ),
       ],
     );
-  }
-
-  _radioButton(String texto, String valor) {
-    return Row(
-      children: <Widget>[
-        Textos(texto),
-        Radio<String>(
-          value: valor,
-          groupValue: _tipo,
-          onChanged: _radioValueChange,
-        ),
-      ],
-    );
-  }
-
-  void _radioValueChange(String? value) {
-    setState(() {
-      _tipo = value!;
-    });
   }
 
   Future<void> _buscar() async {

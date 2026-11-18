@@ -4,25 +4,23 @@ class InputTextos extends StatelessWidget {
   String label;
   TextEditingController controller;
   bool senha;
+  IconData? icone;
 
-  InputTextos(this.rotulo, this.label, {required this.controller, this.senha = false});
+  InputTextos(this.rotulo, this.label, {required this.controller, this.senha = false, this.icone});
 
   @override
   Widget build(BuildContext context) {
-    return   TextFormField(
-      controller:  controller,
-      obscureText: senha,
-      style: TextStyle (
-          color: Colors.black,
-          backgroundColor: Colors.white
-      ),
-      decoration: InputDecoration(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: TextFormField(
+        controller: controller,
+        obscureText: senha,
+        decoration: InputDecoration(
           labelText: rotulo,
-          hintText: label
+          hintText: label,
+          prefixIcon: icone == null ? null : Icon(icone),
+        ),
       ),
     );
-
   }
-
-
 }

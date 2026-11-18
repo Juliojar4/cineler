@@ -40,34 +40,49 @@ class _TelaDetalhesState extends State<TelaDetalhes> {
   }
 
   _body() {
+    final cores = Theme.of(context).colorScheme;
+    final titulo = widget.titulo;
     return ListView(
-      padding: EdgeInsets.all(9),
+      padding: EdgeInsets.all(20),
       children: [
-        Imagens(widget.titulo.imagem, 270),
-        Textos(widget.titulo.nome),
-        Text(widget.titulo.info ?? ""),
-        Text(widget.titulo.descricao ?? "Descrição não disponível"),
+        Center(child: Imagens(titulo.imagem, 300)),
+        SizedBox(height: 20),
+        Textos(titulo.nome),
+        SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            Chip(avatar: Icon(titulo.tipo == "Livro" ? Icons.menu_book : Icons.movie, size: 18), label: Text(titulo.tipo)),
+            if (titulo.info != null && titulo.info!.isNotEmpty) Chip(label: Text(titulo.info!)),
+          ],
+        ),
+        SizedBox(height: 16),
+        Text(
+          titulo.descricao ?? "Descrição não disponível",
+          style: TextStyle(height: 1.5, color: cores.onSurfaceVariant),
+        ),
+        SizedBox(height: 24),
         if (_salvo == null)
           Botoes("Salvar na minha lista", onPressed: _salvar)
         else ...[
-          _radioButton("Quero assistir/ler"),
-          _radioButton("Acompanhando"),
-          _radioButton("Finalizado"),
-          Botoes("Remover da minha lista", onPressed: _remover),
+          Text("Situação", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (var situacao in ["Quero assistir/ler", "Acompanhando", "Finalizado"])
+                ChoiceChip(
+                  label: Text(situacao),
+                  selected: _salvo!.situacao == situacao,
+                  onSelected: (_) => _radioValueChange(situacao),
+                ),
+            ],
+          ),
+          SizedBox(height: 16),
+          Botoes("Remover da minha lista", secundario: true, onPressed: _remover),
         ],
-      ],
-    );
-  }
-
-  _radioButton(String situacao) {
-    return Row(
-      children: <Widget>[
-        Text(situacao),
-        Radio<String>(
-          value: situacao,
-          groupValue: _salvo!.situacao,
-          onChanged: _radioValueChange,
-        ),
       ],
     );
   }

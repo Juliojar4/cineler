@@ -20,22 +20,31 @@ class _TelaLoginState extends State<TelaLogin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("CineLer"),
-      ),
-      body: _body(),
+      body: SafeArea(child: _body()),
     );
   }
 
   _body() {
+    final cores = Theme.of(context).colorScheme;
+    final textos = Theme.of(context).textTheme;
     return ListView(
-      padding: EdgeInsets.all(9),
+      padding: EdgeInsets.fromLTRB(24, 64, 24, 24),
       children: [
-        InputTextos("E-mail *", "Digite seu e-mail", controller: _email),
-        InputTextos("Senha *", "Digite sua senha", controller: _senha, senha: true),
-        Text(_aviso),
+        Icon(Icons.movie_filter_rounded, size: 88, color: cores.primary),
+        SizedBox(height: 12),
+        Text("CineLer", textAlign: TextAlign.center, style: textos.displaySmall?.copyWith(fontWeight: FontWeight.bold)),
+        Text("Filmes, séries e livros em um só lugar", textAlign: TextAlign.center, style: textos.bodyLarge?.copyWith(color: cores.onSurfaceVariant)),
+        SizedBox(height: 40),
+        InputTextos("E-mail *", "Digite seu e-mail", controller: _email, icone: Icons.email_outlined),
+        InputTextos("Senha *", "Digite sua senha", controller: _senha, senha: true, icone: Icons.lock_outline),
+        if (_aviso.isNotEmpty)
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: Text(_aviso, textAlign: TextAlign.center, style: TextStyle(color: cores.error)),
+          ),
+        SizedBox(height: 8),
         Botoes("Entrar", onPressed: _entrar),
-        Botoes("Cadastrar", onPressed: () {
+        Botoes("Criar conta", secundario: true, onPressed: () {
           _abreOutraTela(context, TelaCadastro());
         }),
       ],

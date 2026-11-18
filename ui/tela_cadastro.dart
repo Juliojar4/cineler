@@ -27,13 +27,19 @@ class _TelaCadastroState extends State<TelaCadastro> {
   }
 
   _body() {
+    final cores = Theme.of(context).colorScheme;
     return ListView(
-      padding: EdgeInsets.all(9),
+      padding: EdgeInsets.all(24),
       children: [
-        InputTextos("Nome *", "Digite seu nome", controller: _nome),
-        InputTextos("E-mail *", "Digite seu e-mail", controller: _email),
-        InputTextos("Senha *", "Digite sua senha", controller: _senha, senha: true),
-        Text(_aviso),
+        Icon(Icons.person_add_alt_1_rounded, size: 72, color: cores.primary),
+        SizedBox(height: 24),
+        InputTextos("Nome *", "Digite seu nome", controller: _nome, icone: Icons.person_outline),
+        InputTextos("E-mail *", "Digite seu e-mail", controller: _email, icone: Icons.email_outlined),
+        InputTextos("Senha *", "Digite sua senha", controller: _senha, senha: true, icone: Icons.lock_outline),
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 12),
+          child: Text(_aviso, textAlign: TextAlign.center, style: TextStyle(color: cores.onSurfaceVariant)),
+        ),
         Botoes("Cadastrar", onPressed: _cadastrar),
       ],
     );

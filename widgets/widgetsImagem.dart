@@ -6,13 +6,24 @@ class Imagens extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (url == null) {
-      return Icon(Icons.image_not_supported, size: altura);
-    }
-    return Image.network(
-      url!,
+    final largura = altura * 2 / 3; // proporção de pôster/capa
+    final vazio = Container(
       height: altura,
-      errorBuilder: (context, erro, pilha) => Icon(Icons.image_not_supported, size: altura),
+      width: largura,
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      child: Icon(Icons.image_not_supported, size: largura / 2),
+    );
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(altura > 100 ? 16 : 8),
+      child: url == null
+          ? vazio
+          : Image.network(
+              url!,
+              height: altura,
+              width: largura,
+              fit: BoxFit.cover,
+              errorBuilder: (context, erro, pilha) => vazio,
+            ),
     );
   }
 }
